@@ -4,6 +4,18 @@ namespace app\models;
 
 class User extends \app\models\ar\User implements \yii\web\IdentityInterface
 {
+    
+    /**
+     * @inheritdoc
+     */
+    public function rules()
+    {
+        return [
+            [['username', 'hash'], 'required'],
+            [['hash'], 'string'],
+            [['username', 'access_token', 'auth_key', 'salt'], 'string', 'max' => 32],
+        ];
+    }
 
     /**
      * {@inheritdoc}
@@ -45,7 +57,7 @@ class User extends \app\models\ar\User implements \yii\web\IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->auth_key;
     }
 
     /**
@@ -64,20 +76,30 @@ class User extends \app\models\ar\User implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-        \Yii::trace(['$this->salt.$password'=>$this->salt.$password]);
-        \Yii::trace(['hashcalc'=>\Yii::$app->getSecurity()->generatePasswordHash($this->salt.$this->hash)]);
-        return \Yii::$app->getSecurity()->validatePassword($this->salt.$password, $this->hash);
+        $success = \Yii::$app->getSecurity()->validatePassword($this->salt.$password, $this->hash);
+        if($success){
+            //登录成功前刷新token
+            return $this->updateToken();
+        }
+    }
+
+    public function updateToken(){        
+        $this->auth_key = \Yii::$app->security->generateRandomString();
+        $this->access_token = \Yii::$app->security->generateRandomString(); 
+        return $this->save();
+    }
+
+    public function updatePassword($password){        
+        $this->salt = \Yii::$app->security->generateRandomString();       
+        $this->hash = \Yii::$app->getSecurity()->generatePasswordHash($this->salt.$password);
+        return true;
     }
 
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {
-            if ($this->isNewRecord) {
-                $this->auth_key = \Yii::$app->security->generateRandomString();
-                $this->salt = \Yii::$app->security->generateRandomString();
-                \Yii::trace(['$this->salt.$this->hash'=>$this->salt.$this->hash]);
-                echo $this->salt.$this->hash;
-                $this->hash = \Yii::$app->getSecurity()->generatePasswordHash($this->salt.$this->hash);
+            if ($this->isNewRecord) {   
+                $this->updatePassword($this->hash);
             }
             return true;
         }

@@ -86,7 +86,9 @@ class UserController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) 
+            && $model->updatePassword($model->hash)
+            && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

@@ -14,13 +14,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'username')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'hash')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'access_token')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'auth_key')->textInput(['maxlength' => true]) ?>
-
-    <?= $form->field($model, 'salt')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'hash')->label('password')->textInput(['maxlength' => true]) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>

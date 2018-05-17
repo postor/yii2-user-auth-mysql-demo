@@ -31,7 +31,8 @@ class User extends \yii\db\ActiveRecord
     {
         return [
             [['username', 'hash', 'access_token', 'auth_key', 'salt'], 'required'],
-            [['username', 'hash', 'access_token', 'auth_key', 'salt'], 'string', 'max' => 32],
+            [['hash'], 'string'],
+            [['username', 'access_token', 'auth_key', 'salt'], 'string', 'max' => 32],
         ];
     }
 
